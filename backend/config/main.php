@@ -7,7 +7,7 @@ $params = array_merge(
 );
 
 return [
-    'name' => '***后台',
+    'name' => '后台系统',
     'id' => 'app-backend',
     'language' => 'zh-CN',
     'basePath' => dirname(__DIR__),

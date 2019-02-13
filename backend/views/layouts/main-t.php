@@ -38,7 +38,6 @@ AppAsset::register($this);
                 </li>
             </ul>
             <ul class="layui-nav layui-layout-right" lay-filter="layadmin-layout-right">
-
 <!--                <li class="layui-nav-item" lay-unselect>-->
 <!--                    <a lay-href="app/message/index.html" layadmin-event="message" lay-text="消息中心">-->
 <!--                        <i class="layui-icon layui-icon-notice"></i>-->
@@ -102,7 +101,7 @@ AppAsset::register($this);
                                 <a lay-href="role/power/role">角色管理</a>
                             </dd>
                             <dd data-name="操作日志">
-                                <a lay-href="system/log/index">操作日志</a>
+                                <a lay-href="system/admin-log/index">操作日志</a>
                             </dd>
                             <?php endif;?>
                         </dl>

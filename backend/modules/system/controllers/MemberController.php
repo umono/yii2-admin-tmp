@@ -18,7 +18,7 @@ use yii\web\NotFoundHttpException;
 
 class MemberController extends Controller
 {
-    private  $model;
+    public $model;
 
     public $modelClass = 'api\modules\v1\models\user\Member';
 

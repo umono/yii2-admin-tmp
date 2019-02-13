@@ -3,15 +3,9 @@
 namespace backend\models;
 
 
-use api\models\PageParam;
-use backend\modules\system\models\Admin;
-use backend\modules\system\models\AdminLog;
-use common\tools\Upload;
-use function GuzzleHttp\Psr7\uri_for;
-use \yii\db\ActiveRecord;
-use yii\helpers\Json;
-use yii\helpers\VarDumper;
+use backend\modules\system\models\Log;
 use Yii;
+use yii\web\UnauthorizedHttpException;
 
 /**
  * Created by PhpStorm.
@@ -19,7 +13,7 @@ use Yii;
  * Date: 2018/6/7
  * Time: 下午5:03
  */
-class BaseModel extends  ActiveRecord
+class BaseModel extends  Repository
 {
 
     public function model()
@@ -36,11 +30,11 @@ class BaseModel extends  ActiveRecord
         if($insert) {
             $data = $this->attributes;
             $index = Yii::$app->request->post();
-            AdminLog::create(AdminLog::TYPE_CREATE,$data,$index);
+            Log::create(Log::TYPE_CREATE,$data,$index);
         } else {
             $data = $this->attributes;
             $index = Yii::$app->request->post();
-            AdminLog::create(AdminLog::TYPE_UPDATE,$data,$index);
+            Log::create(Log::TYPE_UPDATE,$data,$index);
         }
     }
 
@@ -67,7 +61,7 @@ class BaseModel extends  ActiveRecord
         parent::afterDelete();
         $index = Yii::$app->request->post('id');
         $data = Yii::$app->request->post();
-        AdminLog::create(AdminLog::TYPE_DELETE,$data,$index);
+        Log::create(Log::TYPE_DELETE,$data,$index);
     }
 
 
@@ -102,6 +96,34 @@ class BaseModel extends  ActiveRecord
             return '';
         }
         return array_shift($firstError);
+    }
+    // 返回指定列的数据
+    public  function backColumnModel($id,$column,$is_array = false)
+    {
+        $model = $this->name();
+        $model = new $model();
+        $model = $model->findOne(['id'=>$id]);
+        if ($model !== null){
+            $arr = self::getColumn();
+            if ($is_array) {
+                $item = [];
+                foreach ($column as $v) {
+                    if (in_array($v, $arr)) {
+                        $item[$v] = $model->$v;
+                    } else {
+                        $item[$v] = 'no column';
+                    }
+                }
+                return $item;
+            }else{
+                if (in_array($column, $arr)) {
+                    return $model->$column;
+                } else {
+                    throw new UnauthorizedHttpException('no column');
+                }
+            }
+        }
+        throw new UnauthorizedHttpException('居然没...');
     }
 
 }

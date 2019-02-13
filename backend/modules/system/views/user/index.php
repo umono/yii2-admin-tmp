@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ,page:true
             ,limits:[10,20,50,100]
             ,limit:20
-            ,height: 'full'
+            ,height: 'full-100'
             }" lay-filter="test">
         <thead>
         <tr>

@@ -10,11 +10,7 @@ use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\UnauthorizedHttpException;
 
-/**
- * Class Controller 后台的基础控制器
- * @author  liujx
- * @package backend\controllers
- */
+
 class Controller extends BaseController
 {
 
@@ -38,6 +34,10 @@ class Controller extends BaseController
                     )
                     && Yii::$app->getErrorHandler()->exception === null
                 ) {
+                    $user = Admin::findOne(Yii::$app->user->id);
+                    if ($user->id == 1){
+                        return true;
+                    }
                     if (Yii::$app->request->isAjax){
                         return "您暂无权限访问！";
                     }else {
@@ -102,9 +102,7 @@ class Controller extends BaseController
 
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        return $this->render('view');
     }
 
     public function actionCreate()
@@ -122,13 +120,6 @@ class Controller extends BaseController
         ]);
     }
 
-    /**
-     * Updates an existing Material model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
@@ -142,12 +133,6 @@ class Controller extends BaseController
         ]);
     }
 
-
-    /**
-     * @param $id
-     * @return bool
-     * @throws NotFoundHttpException
-     */
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
@@ -160,17 +145,11 @@ class Controller extends BaseController
         return $model->save()?true:false;
     }
 
-    /**
-     * @param $id
-     * @return mixed
-     * @throws NotFoundHttpException
-     */
     protected function findModel($id)
     {
         if (($model = $this->model->findOne($id)) !== null) {
             return $model;
         }
-
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

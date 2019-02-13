@@ -2,8 +2,7 @@
 
 namespace backend\modules\role\controllers;
 
-use backend\modules\role\models\Rbac;
-use backend\modules\system\models\AdminLog;
+use backend\modules\system\models\Log as AdminLog;
 use backend\tools\PageParam;
 use Yii;
 use backend\modules\role\models\AuthItem;
@@ -34,10 +33,10 @@ class PowerController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class'   => VerbFilter::className(),
                 'actions' => [
-                    'delete' => ['POST'],
-                    'role-power' => ['POST'],
+                    'delete'         => ['POST'],
+                    'role-power'     => ['POST'],
                     'del-role-power' => ['POST'],
                 ],
             ],
@@ -59,6 +58,7 @@ class PowerController extends Controller
 
     /**
      * 创建权限
+     *
      * @return string|\yii\web\Response
      * @throws UnauthorizedHttpException
      */
@@ -68,12 +68,12 @@ class PowerController extends Controller
         if (Yii::$app->request->isPost) {
             $post = Yii::$app->request->post();
 
-            if (empty($post['AuthItem']['rule_name'])){
+            if (empty($post['AuthItem']['rule_name'])) {
                 unset($post['AuthItem']['rule_name']);
             }
             if ($model->load($post) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->name]);
-            }else{
+            } else {
                 throw new UnauthorizedHttpException('对不起，您现在还没获得该操作的权限!');
             }
         }
@@ -83,6 +83,7 @@ class PowerController extends Controller
 
     /**
      * 创建角色
+     *
      * @return string|\yii\web\Response
      * @throws UnauthorizedHttpException
      */
@@ -90,10 +91,10 @@ class PowerController extends Controller
     {
         $model = new AuthItem();
 
-        if(Yii::$app->request->isPost) {
+        if (Yii::$app->request->isPost) {
             if ($model->load(Yii::$app->request->post()) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->name]);
-            }else{
+            } else {
                 throw new UnauthorizedHttpException('创建角色，请稍候重试');
             }
         }
@@ -103,6 +104,7 @@ class PowerController extends Controller
 
     /**
      * 更新
+     *
      * @param $id
      * @return string|\yii\web\Response
      * @throws UnauthorizedHttpException
@@ -116,8 +118,7 @@ class PowerController extends Controller
 
             if ($model->load($post) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->name]);
-            }else{
-                return $model->errors;
+            } else {
                 throw new UnauthorizedHttpException('更新角色，请稍候重试');
             }
         }
@@ -126,21 +127,24 @@ class PowerController extends Controller
 
 
     }
+
     /**
      * Deletes an existing AuthItem model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
+     *
      * @param string $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id)
     {
-        return $this->findModel($id)->delete()?true:false;
+        return $this->findModel($id)->delete() ? true : false;
     }
 
     /**
      * Finds the AuthItem model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param string $id
      * @return AuthItem the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -156,57 +160,59 @@ class PowerController extends Controller
 
     /**
      * 返回权限信息
+     *
      * @return mixed
      */
     public function actionPowerData()
     {
-        $param = Yii::$app->request->get();
+        $param         = Yii::$app->request->get();
         $param['type'] = 2;
-        return $this->page->getPageParam($this->modelClass,$param);
+        return $this->page->getPageParam($this->modelClass, $param);
     }
 
     public function actionRoleData()
     {
-        $param = Yii::$app->request->get();
+        $param         = Yii::$app->request->get();
         $param['type'] = 1;
-        return $this->page->getPageParam($this->modelClass,$param);
+        return $this->page->getPageParam($this->modelClass, $param);
     }
 
     public function actionRole()
     {
         return $this->render('role');
     }
+
     //角色添加权限页面
     public function actionRolePowers($id)
     {
         $role = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
-        foreach ($role as $k => $v){
-            if(($k == 'admin' || $k == 'administrator')){
+        foreach ($role as $k => $v) {
+            if (($k == 'admin' || $k == 'administrator')) {
 
                 $data = AuthItem::find()->with('authItemChildren.child0')
                     ->where(['name' => $id])
                     ->asArray()->all();
-                $arr = [];
+                $arr  = [];
                 if (!empty($data[0]['authItemChildren'])) {
                     foreach ($data[0]['authItemChildren'] as $key => $val) {
                         $arr[] = $val['child0']['description'];
                     }
                 }
-                $param = Yii::$app->request->get();
-                $name = isset($param['name'])?$param['name']:'';
-                $descriptions= isset($param['description'])?$param['description']:'';
+                $param        = Yii::$app->request->get();
+                $name         = isset($param['name']) ? $param['name'] : '';
+                $descriptions = isset($param['description']) ? $param['description'] : '';
 
-                $power = AuthItem::find()->where('type=2')
-                    ->andWhere(['like','name',$name])
-                    ->andWhere(['like','description',$descriptions])
+                $power  = AuthItem::find()->where('type=2')
+                    ->andWhere(['like', 'name', $name])
+                    ->andWhere(['like', 'description', $descriptions])
                     ->asArray()
                     ->all();
-                $powers=[];
-                foreach ($power as $k => $v){
+                $powers = [];
+                foreach ($power as $k => $v) {
                     $powers[$v['name']] = $v['description'];
                 }
                 return $this->render('role-powers', ['power' => $powers, 'arr' => $arr, 'id' => $id]);
-            }else{
+            } else {
                 throw new UnauthorizedHttpException('对不起，您现在还没获得该操作的权限!');
             }
         }
@@ -214,43 +220,44 @@ class PowerController extends Controller
 
     //添加角色权限
     public function actionRolePower()
-    {   $role = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
+    {
+        $role = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
         foreach ($role as $k => $v) {
             if (($k == 'admin' || $k == 'administrator')) {
-                $auth = Yii::$app->authManager;
-                $data = \Yii::$app->request->post();
-                $role = $data['role'];
-                $power = $data['id'];
+                $auth   = Yii::$app->authManager;
+                $data   = \Yii::$app->request->post();
+                $role   = $data['role'];
+                $power  = $data['id'];
                 $parent = $auth->createRole($role);
-                $child = $auth->createPermission($power);
-                AdminLog::create(AdminLog::TYPE_CREATE,$data,$power);
-                return $auth->addChild($parent, $child)?true:false;
-            }else{
+                $child  = $auth->createPermission($power);
+                AdminLog::create(AdminLog::TYPE_CREATE, $data, $power);
+                return $auth->addChild($parent, $child) ? true : false;
+            } else {
                 throw new UnauthorizedHttpException('对不起，您现在还没获得该操作的权限!');
             }
         }
 
     }
+
     //删除角色权限
     public function actionDelRolePower()
     {
         $role = Yii::$app->authManager->getRolesByUser(Yii::$app->user->id);
         foreach ($role as $k => $v) {
             if (($k == 'admin' || $k == 'administrator')) {
-                $auth = Yii::$app->authManager;
-                $data = \Yii::$app->request->post();
-                $role = $data['role'];
-                $power = $data['id'];
+                $auth   = Yii::$app->authManager;
+                $data   = \Yii::$app->request->post();
+                $role   = $data['role'];
+                $power  = $data['id'];
                 $parent = $auth->createRole($role);
-                $child = $auth->createPermission($power);
+                $child  = $auth->createPermission($power);
                 AdminLog::create(AdminLog::TYPE_DELETE, $data, $power);
                 return $auth->removeChild($parent, $child) ? true : false;
-            }else{
+            } else {
                 throw new UnauthorizedHttpException('对不起，您现在还没获得该操作的权限!');
             }
         }
     }
-
 
 
 }

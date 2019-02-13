@@ -2,10 +2,9 @@
 
 namespace backend\modules\system\models;
 
+use backend\models\BaseModel;
+use backend\models\Repository;
 use Yii;
-use \yii\db\ActiveRecord;
-use yii\helpers\Json;
-use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "{{%admin_log}}".
@@ -20,7 +19,7 @@ use yii\helpers\VarDumper;
  * @property string $created_at 创建时间
  * @property int $created_id 创建用户
  */
-class AdminLog extends ActiveRecord
+class AdminLog extends BaseModel
 {
     /**
      * 类型
@@ -72,41 +71,4 @@ class AdminLog extends ActiveRecord
     }
 
 
-    public static function getTypeDescription($type = null)
-    {
-        $mixReturn = [
-            self::TYPE_CREATE => '创建',
-            self::TYPE_CREATE => '创建',
-            self::TYPE_UPDATE => '修改',
-            self::TYPE_DELETE => '删除',
-            self::TYPE_OTHER => '其他',
-            self::TYPE_UPLOAD => '上传',
-        ];
-        if ($type !== null) {
-            $mixReturn = isset($mixReturn[$type]) ? $mixReturn[$type] : null;
-        }
-
-        return $mixReturn;
-    }
-
-    /**
-     * 创建日志
-     * @param integer $type 类型
-     * @param array $params 请求参数
-     * @param string $index 数据唯一标识
-     * @return bool
-     */
-    public static function create($type, $params = [], $index = '')
-    {
-        $log = new AdminLog();
-        $log->type = $type;
-        $log->params = Json::encode($params);
-        $log->controller = Yii::$app->controller->id;
-        $log->action = Yii::$app->controller->action->id;
-        $log->url = Yii::$app->request->url;
-        $log->index = Json::encode($index);
-        $log->created_id = Yii::$app->user->id;
-        $log->created_at = date('Y-m-d H:s:i');
-        return $log->save();
-    }
 }

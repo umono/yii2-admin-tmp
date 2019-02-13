@@ -20,10 +20,10 @@
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
         "filsh/yii2-oauth2-server": "*",
         "yiisoft/yii2-httpclient": "*",
-        "callmez/yii2-wechat-sdk": "^0.3.0",
         "guzzlehttp/guzzle": "*",
         "vlucas/phpdotenv": "^2.5",
-        "phpoffice/phpexcel": "*"
+        "phpoffice/phpspreadsheet": "*",
+        "aki/yii2-vue": "^0.5.1"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

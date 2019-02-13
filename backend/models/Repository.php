@@ -9,9 +9,8 @@
 namespace backend\models;
 
 
-use backend\modules\shop\models\Order;
 use backend\modules\system\models\Admin;
-use backend\modules\system\models\AdminLog;
+use backend\modules\system\models\Log;
 use backend\tools\PageParam;
 use common\tools\Upload;
 use yii\base\Model;
@@ -42,38 +41,6 @@ abstract class Repository extends ActiveRecord implements RepositoryInterface
         $model = $this->model();
         return $this->model = new $model;
     }
-
-//    /**
-//     * 查询指定建
-//     * @param $id
-//     * @param array $columns
-//     * @return mixed
-//     */
-//    public function findById($id, $columns = array('*'))
-//    {
-//        return $this->model->find()->select($columns)->where('id=:id',[":id"=>$id])->one();
-//    }
-//    /**
-//     * 根据指定条件查询一条数据
-//     * @param $attribute
-//     * @param $value
-//     * @param array $columns
-//     * @return mixed
-//     */
-//    public function findByWhere($attribute, $value, $columns = array('*'))
-//    {
-//        return $this->model->find()->where(['=', $attribute, $value])->select($columns)->one();
-//    }
-//
-//    /**
-//     * 返回所有的数据
-//     * @param array $columns
-//     * @return mixed
-//     */
-//    public function All($columns = array('*'))
-//    {
-//        return $this->model->find()->select($columns)->asArray()->all();
-//    }
 
     /**
      * 删除
@@ -117,8 +84,9 @@ abstract class Repository extends ActiveRecord implements RepositoryInterface
      * @param array $table  多表关联的字段
      * @return mixed|string
      */
-    public function getTablesParam($where = [],$table = [])
+    public function getTablesParam($where = [],$table = [],$sort = "created_at",$SORT_DESC = SORT_DESC)
     {
+        $param = Yii::$app->request->get();
         $column = $this->getColumn();
         $query = $this->model->find();
         // 判断是否是需要join表的
@@ -126,15 +94,7 @@ abstract class Repository extends ActiveRecord implements RepositoryInterface
             $table = explode(',',$where['tables']);
             unset($where['tables']);
         }
-        if ($this->model == new Order()){
-            $query = $this->model->find()
-                ->andWhere(['<>','order.status',99])
-                ->andWhere(['<>','order.status',9]);
-            if (array_key_exists('status',$where)){
-                $query->andWhere(['like','order.status',$where['status']]);
-                unset($where['status']);
-            }
-        }
+
         $query->JoinWith($table)->orderBy('')->asArray()->all();
         if (count($where)>=3) {
             foreach ($where as $k => $v){
@@ -157,12 +117,21 @@ abstract class Repository extends ActiveRecord implements RepositoryInterface
         }
         $count = $query->count();
         $pagination = new PageParam(['totalCount' => $count]);
-        $data = $query->offset($pagination->offset)
-            ->limit($pagination->limit)
-            ->orderBy([
-                'created_at'=>SORT_DESC,
-            ])
-            ->all();
+        if (in_array($sort,$column)) {
+            $param['limit'] = $param['limit']??"20";
+            $param['page'] = $param['page']??"1";
+            $offset = $param['limit'] * ($param['page'] - 1);
+            $data = $query->offset($offset)
+                ->limit($param['limit'])
+                ->orderBy([
+                    $sort => $SORT_DESC,
+                ])
+                ->all();
+        }else{
+            $data = $query->offset($pagination->offset)
+                ->limit($pagination->limit)
+                ->all();
+        }
         return [
             'code'=>0,
             'count'=>(int)$count,
@@ -226,16 +195,15 @@ abstract class Repository extends ActiveRecord implements RepositoryInterface
         return $item;
     }
 
-    public function beforeSave($insert)
-    {
-        parent::beforeSave($insert);
-        if ($insert){
-            $this->created_at = date('Y-m-d H:i:s');
-            return true;
-        }else{
-            return true;
-        }
-    }
+//    public function beforeSave($insert)
+//    {
+//        parent::beforeSave($insert);
+//        if ($insert){
+//            return true;
+//        }else{
+//            return true;
+//        }
+//    }
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -245,11 +213,11 @@ abstract class Repository extends ActiveRecord implements RepositoryInterface
         if($insert) {
             $data = $this->attributes;
             $index = Yii::$app->request->post();
-            AdminLog::create(AdminLog::TYPE_CREATE,$data,$index);
+            Log::create(Log::TYPE_CREATE,$data,$index);
         } else {
             $data = $this->attributes;
             $index = Yii::$app->request->post();
-            AdminLog::create(AdminLog::TYPE_UPDATE,$data,$index);
+            Log::create(Log::TYPE_UPDATE,$data,$index);
         }
     }
 
@@ -276,15 +244,12 @@ abstract class Repository extends ActiveRecord implements RepositoryInterface
         parent::afterDelete();
         $index = Yii::$app->request->post('id');
         $data = Yii::$app->request->post();
-        AdminLog::create(AdminLog::TYPE_DELETE,$data,$index);
+        Log::create(Log::TYPE_DELETE,$data,$index);
     }
 
     public function index()
     {
         $params = Yii::$app->request->get();
-        if (empty($params['status'])){
-            $params['status'] = 1;//必须是已启用的
-        }
         return $this->getTablesParam($params);
     }
 
