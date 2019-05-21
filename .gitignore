@@ -18,7 +18,6 @@ nbproject
 Thumbs.db
 
 # composer vendor dir
-/vendor
 
 # composer itself is not needed
 composer.phar
@@ -36,7 +35,6 @@ phpunit.phar
 .tags
 .tags_sorted_by_file
 
-composer.lock
 codeception.yml
 
 .env
