@@ -116,14 +116,6 @@ return [
                 //图片上传
                 // 'GET upload/<action:\w+>' => 'upload/<action>',
                 'POST upload/<action:\w+>' => 'upload/<action>',
-                /**---------------------------------------------
-                 * 测试
-                 * ---------------------------------------------*/
-                'GET test/<action:\w+>' => 'test/<action>',
-                'GET testoauth/<action:\w+>' => 'testoauth/<action>',
-                'POST testoauth/<action:\w+>' => 'testoauth/<action>',
-                'GET oauth/<action:\w+>' => 'oauth/<action>',
-                //
                 ['class' => 'yii\rest\UrlRule', 'controller' => ['v1/user'],
                     'extraPatterns' => [
                         'POST logout' => 'logout',
