@@ -23,7 +23,8 @@
         "guzzlehttp/guzzle": "*",
         "vlucas/phpdotenv": "^2.5",
         "phpoffice/phpspreadsheet": "*",
-        "aki/yii2-vue": "^0.5.1"
+        "aki/yii2-vue": "^0.5.1",
+        "overtrue/wechat": "~4.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",
