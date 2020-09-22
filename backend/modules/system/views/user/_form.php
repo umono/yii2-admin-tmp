@@ -11,7 +11,7 @@ use yii\widgets\ActiveForm;
 <div class="users-form">
     <div class="user-info-img box-shadow-0 padding-rl-0" style="margin: 20px 0;">
         <img id="avatarPreview" src="<?=
-        $model->avatar ? $model->avatar:'http://pic1.16pic.com/00/53/84/16pic_5384253_b.jpg'
+        $model->avatar ? $model->avatar:'/img/avatar.png'
         ?>" alt="">
     </div>
     <?php $form = ActiveForm::begin(
